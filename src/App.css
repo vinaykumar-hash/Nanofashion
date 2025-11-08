@@ -1,0 +1,47 @@
+/* 1. Define the REGULAR (400) weight/style under the family 'Kollektif' */
+@font-face {
+  font-family: 'Kollektif'; 
+  src: url('./assets/fonts/Kollektif.ttf') format('truetype');
+  font-weight: 400; /* Regular */
+  font-style: normal;
+}
+
+/* 2. Define the ITALIC (400) weight/style under the same family 'Kollektif' */
+@font-face {
+  font-family: 'Kollektif'; 
+  src: url('./assets/fonts/Kollektif-Italic.ttf') format('truetype');
+  font-weight: 400; /* Regular */
+  font-style: italic; /* <--- KEY: This links the file to the italic style */
+}
+
+/* 3. Define the BOLD (700) weight/style under the same family 'Kollektif' */
+@font-face {
+  font-family: 'Kollektif'; 
+  src: url('./assets/fonts/Kollektif-Bold.ttf') format('truetype');
+  font-weight: 700; /* Bold */
+  font-style: normal;
+}
+
+/* 4. Define the BOLD ITALIC (700) weight/style under the same family 'Kollektif' */
+@font-face {
+  font-family: 'Kollektif'; 
+  src: url('./assets/fonts/Kollektif-BoldItalic.ttf') format('truetype');
+  font-weight: 700; /* Bold */
+  font-style: italic; /* <--- KEY: This links the file to the italic style */
+}
+
+/* 5. Tailwind Import */
+@import "tailwindcss";
+
+/* 6. Consolidated @theme block */
+@theme {
+  /* --- Custom Fonts --- */
+  /* This creates a single utility class: font-kollektif */
+  /* It MUST use the EXACT family name from @font-face */
+  --font-kollektif: 'Kollektif', sans-serif; 
+  
+  /* --- Custom Colors (your original code, which is correct) --- */
+  --color-primary: #1A2A4F;
+  --color-primary-dark: #101010;
+  --color-primary-tint: #F7A5A5;
+}
