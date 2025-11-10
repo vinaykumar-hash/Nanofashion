@@ -46,7 +46,7 @@ export default function Dashboard() {
   return (
     <div className="text-white font-kollektif bg-[#111] min-h-screen flex items-center justify-start flex-col">
       {user ? <Header userID={user.id} /> : <p>Loading...</p>}
-      <div className="flex items-start justify-start w-full">
+      <div className="flex items-start justify-start w-full flex-1">
         <SideMenu/>
         <Main/>
       </div>

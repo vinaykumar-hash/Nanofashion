@@ -4,7 +4,7 @@ import ClothsSideMenu from './ClothsSideMenu'
 function SideMenu() {
     const [selected , setSelected] = useState(0)
   return (
-            <div className="ml-8 max-w-96 bg-white/10 rounded-xl">
+            <div className="ml-8 w-3/7 bg-white/10 rounded-xl h-full">
         {/* Outer flex — aligns buttons and dots side-by-side */}
         <div className="flex justify-between items-center rounded-xl p-2">
             {/* Button group (takes remaining space) */}
