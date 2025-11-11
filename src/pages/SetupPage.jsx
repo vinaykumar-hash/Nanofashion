@@ -15,8 +15,8 @@ export default function SetupProfile() {
   const avatarFilenames = [
     "Profile.png",
     "Profile.png",
-    "Profile.png",
-    "Profile.png",
+    "Profile1.png",
+    "Profile2.png",
     "Profile.png",
   ];
 

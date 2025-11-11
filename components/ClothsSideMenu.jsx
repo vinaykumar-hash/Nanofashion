@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ClothCard from "./ClothCard";
 import axios from "axios";
-
+// import Loader from "./LoadingBar";
 function ClothsSideMenu() {
   const [cloths, setCloths] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,12 +68,17 @@ function ClothsSideMenu() {
           placeholder="Describe Your Outfit.."
           className="w-full px-4 py-4 tracking-normal outline-none bg-primary-dark/20"
         />
-        <button
-          onClick={handleGenerate}
-          className="bg-primary-tint text-primary-dark font-bold text-xl tracking-tight w-full py-2 hover:bg-primary-tint/80 rounded-xl"
-        >
-          Generate
-        </button>
+        <div className="w-full relative">
+          <div className="absolute"></div>
+          
+          <button
+            onClick={handleGenerate}
+            className="bg-primary-tint text-primary-dark font-bold text-xl tracking-tight w-full py-2 hover:bg-primary-tint/80 rounded-xl"
+          >
+            Generate
+          </button>
+        </div>
+        
       </div>
     </div>
   );
