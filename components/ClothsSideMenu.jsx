@@ -12,7 +12,7 @@ function ClothsSideMenu() {
     const fetchCloths = async () => {
       try {
         setLoading(true);
-        const response = await axios.get("http://localhost:5000/api/gemini/generated-cloths");
+        const response = await axios.get(import.meta.env.VITE_BACKEND_URL+"/api/gemini/generated-cloths");
         if (response.data.success) setCloths(response.data.cloths);
         else setError("Failed to fetch images");
       } catch (err) {
@@ -29,7 +29,7 @@ function ClothsSideMenu() {
     if (!prompt.trim()) return alert("Enter a prompt!");
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:5000/api/gemini/generate-cloth", { prompt });
+      const response = await axios.post(import.meta.env.VITE_BACKEND_URL+"/api/gemini/generate-cloth", { prompt });
       if (response.data.success) {
         setLoading(false);
         setCloths((prev) => [response.data, ...prev]);

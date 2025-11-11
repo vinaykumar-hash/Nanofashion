@@ -26,7 +26,7 @@ function Main() {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      const response = await axios.post("http://localhost:5000/api/temp/upload-avatar", formData, {
+      const response = await axios.post(import.meta.env.VITE_BACKEND_URL+"/api/temp/upload-avatar", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       if (response.data?.url) {
@@ -69,7 +69,7 @@ function Main() {
         imageUrls: [localStorage.getItem("userAvatar"), ...cloths],
         prompt,
       };
-      const response = await axios.post("http://localhost:5000/api/gemini/edit-image", body);
+      const response = await axios.post(import.meta.env.VITE_BACKEND_URL+"/api/gemini/edit-image", body);
       if (response.data?.url) setResultUrl(response.data.url);
       else alert("No image URL returned by API");
     } catch (error) {
@@ -82,7 +82,7 @@ function Main() {
   const handleEnhance = async () => {
     try {
       setLoading(true);
-      const response = await axios.post("http://localhost:5000/api/gemini/optimize-prompt", { prompt });
+      const response = await axios.post(import.meta.env.VITE_BACKEND_URL+"/api/gemini/optimize-prompt", { prompt });
       if (response.data?.optimized_prompt) {
         const enhanced = response.data.optimized_prompt;
         const confirmReplace = window.confirm(

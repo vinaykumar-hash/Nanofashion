@@ -19,7 +19,7 @@ function MyGenerations() {
       try {
         setLoading(true);
         const response = await axios.get(
-          `http://localhost:5000/api/gemini/generated-images/${profileId}`
+          import.meta.env.VITE_BACKEND_URL+`/api/gemini/generated-images/${profileId}`
         );
 
         if (response.data.success) {
