@@ -3,10 +3,10 @@ import MyGenerationsCard from "./MyGenerationsCard";
 import axios from "axios";
 
 function MyGenerations() {
-  const [cloths, setCloths] = useState([]); // store fetched images
+  const [cloths, setCloths] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const profileId = localStorage.getItem("ProfileID"); // 👈 read from localStorage
+  const profileId = localStorage.getItem("ProfileID");
 
   useEffect(() => {
     const fetchCloths = async () => {
@@ -39,7 +39,10 @@ function MyGenerations() {
   }, [profileId]);
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center overflow-hidden relative">
+      {loading ? <div className="absolute h-full w-full bg-white/10 backdrop-blur-3xl z-10 flex justify-center items-center">
+        <div className="h-10 w-10 bg-white animate-spin"></div>
+      </div> : null}
       <div className="flex flex-wrap gap-4 justify-center p-4 h-96 overflow-y-scroll scrollbar-hide w-full">
         {loading ? (
           <p className="text-gray-400">Loading...</p>

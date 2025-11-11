@@ -173,8 +173,8 @@ function Main() {
 
 
   return (
-    <div className="m-4 text-white flex flex-col items-start justify-start gap-4 px-4 w-full">
-      <h1 className="text-xl mb-2">Let's Start Fresh Today</h1>
+    <div className="m-4 text-white flex flex-col items-start justify-start gap-4 px-4 w-full h-screen">
+      <h1 className="text-xl mb-2 text-white/40">Let's Start <a className="font-bold text-white/60">Fresh Today</a></h1>
 
       <div className="flex gap-6 w-full max-w-5xl flex-col sm:flex-row">
         <div className="flex flex-col items-center w-full sm:w-60 rounded-lg overflow-hidden relative">

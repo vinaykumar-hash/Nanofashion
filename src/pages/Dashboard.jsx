@@ -43,9 +43,9 @@ export default function Dashboard() {
   }, [navigate]);
 
   return (
-    <div className="text-white font-kollektif bg-[#111] min-h-screen flex items-center justify-start flex-col">
+    <div className=" text-white font-kollektif bg-[#111] min-h-screen flex items-center justify-start flex-col">
       {user ? <Header userID={user.id} /> : <p>Loading...</p>}
-      <div className="flex items-start justify-start w-full flex-1">
+      <div className=" flex items-start justify-start w-full flex-1 h-screen">
         <SideMenu/>
        {user ? <Main userID={user.id} /> : <p>Loading...</p>}
       </div>
