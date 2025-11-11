@@ -12,8 +12,7 @@ export const getUserGeneratedImages = async (req, res) => {
       .from("generated_images")
       .select("id, image_url, request_id, created_at")
       .eq("request_id", profileId)
-      .order("created_at", { ascending: false })
-      .limit(5);
+      .order("created_at", { ascending: false });
 
     if (error) throw error;
 

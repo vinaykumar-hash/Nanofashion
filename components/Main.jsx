@@ -1,208 +1,140 @@
-
 import React, { useState, useEffect } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 import SelectedCloths from "./SelectedCloth";
 import axios from "axios";
 import heic2any from "heic2any";
+
 function Main() {
   const [avatar, setAvatar] = useState(localStorage.getItem("userAvatar") || "");
   const [cloths, setCloths] = useState([]);
   const [hovering, setHovering] = useState(false);
   const [resultUrl, setResultUrl] = useState("");
   const [loading, setLoading] = useState(false);
-  const [Prompt, setPrompt] = useState("");
+  const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
-  const loadCloths = () => {
-    const stored = JSON.parse(localStorage.getItem("selectedCloths")) || [];
-    setCloths(stored);
-    console.log( cloths);
-  };
-
-  loadCloths();
-
-  window.addEventListener("clothsUpdated", loadCloths);
-
-  return () => {
-    window.removeEventListener("clothsUpdated", loadCloths);
-  };
-}, []);
-
-    const uploadAvatarToServer = async (file) => {
-      try {
-        const formData = new FormData();
-        formData.append("image", file);
-
-        const response = await axios.post(
-          "http://localhost:5000/api/temp/upload-avatar",
-          formData,
-          {
-            headers: { "Content-Type": "multipart/form-data" },
-          }
-        );
-
-        if (response.data && response.data.url) {
-          const uploadedUrl = response.data.url;
-          localStorage.setItem("userAvatar", uploadedUrl);
-          setAvatar(uploadedUrl);
-          console.log(" Avatar uploaded:", uploadedUrl);
-          return uploadedUrl;
-        } else {
-          throw new Error("No URL returned from upload API");
-        }
-      } catch (error) {
-        console.error(" Error uploading avatar:", error.message);
-        alert("Error uploading avatar: " + error.message);
-        return null;
-      }
+    const loadCloths = () => {
+      const stored = JSON.parse(localStorage.getItem("selectedCloths")) || [];
+      setCloths(stored);
     };
+    loadCloths();
+    window.addEventListener("clothsUpdated", loadCloths);
+    return () => window.removeEventListener("clothsUpdated", loadCloths);
+  }, []);
+
+  const uploadAvatarToServer = async (file) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      const response = await axios.post("http://localhost:5000/api/temp/upload-avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      if (response.data?.url) {
+        localStorage.setItem("userAvatar", response.data.url);
+        setAvatar(response.data.url);
+        return response.data.url;
+      } else throw new Error("Upload failed");
+    } catch (error) {
+      alert("Error uploading avatar: " + error.message);
+      return null;
+    }
+  };
 
   const handleAvatarUpload = async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-  let convertedFile = file;
-
-  if (file.type === "image/heic" || file.type === "image/heif") {
-    try {
-      const blob = await heic2any({
-        blob: file,
-        toType: "image/jpeg",
-        quality: 0.9,
-      });
-      convertedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), {
-        type: "image/jpeg",
-      });
-      console.log("Converted HEIC → JPEG");
-    } catch (error) {
-      console.error("Error converting HEIC:", error);
-      alert("Error converting HEIC image. Please try a JPG/PNG file instead.");
-      return;
+    let convertedFile = file;
+    if (file.type === "image/heic" || file.type === "image/heif") {
+      try {
+        const blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.9 });
+        convertedFile = new File([blob], file.name.replace(/\.[^/.]+$/, ".jpg"), { type: "image/jpeg" });
+      } catch {
+        alert("Error converting HEIC. Please use JPG/PNG.");
+        return;
+      }
     }
-  }
 
-  const uploadedUrl = await uploadAvatarToServer(convertedFile);
-  if (uploadedUrl) {
-    setAvatar(uploadedUrl);
-  }
-};
-
-
-  const handleEdit = () => {
-    document.getElementById("avatarUpload").click();
+    await uploadAvatarToServer(convertedFile);
   };
 
+  const handleGenerate = async () => {
+    if (loading) return;
+    if (!localStorage.getItem("userAvatar")) return alert("Please upload an avatar first!");
+    try {
+      setLoading(true);
+      setResultUrl("");
+      const body = {
+        id: localStorage.getItem("ProfileID"),
+        imageUrls: [localStorage.getItem("userAvatar"), ...cloths],
+        prompt,
+      };
+      const response = await axios.post("http://localhost:5000/api/gemini/edit-image", body);
+      if (response.data?.url) setResultUrl(response.data.url);
+      else alert("No image URL returned by API");
+    } catch (error) {
+      alert("Error calling API: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnhance = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post("http://localhost:5000/api/gemini/optimize-prompt", { prompt });
+      if (response.data?.optimized_prompt) {
+        const enhanced = response.data.optimized_prompt;
+        const confirmReplace = window.confirm(
+          `Enhanced Prompt:\n\n${enhanced}\n\nReplace current prompt?`
+        );
+        if (confirmReplace) setPrompt(enhanced);
+      }
+    } catch (error) {
+      alert("Error enhancing prompt: " + error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEdit = () => document.getElementById("avatarUpload").click();
   const handleDelete = () => {
     setAvatar("");
     localStorage.removeItem("userAvatar");
   };
 
-  const handleGenerate = async () => {
-    if(loading) return;
-      try {
-        setLoading(true);
-        setResultUrl("");
-
-        // Fetch avatar URL from localStorage
-        const storedAvatar = localStorage.getItem("userAvatar");
-
-        if (!storedAvatar) {
-          alert("Please upload an avatar first!");
-          setLoading(false);
-          return;
-        }
-
-        // Merge avatar URL + selected cloths
-        const combinedImages = [storedAvatar, ...cloths];
-
-        const body = {
-          id: localStorage.getItem("ProfileID"),
-          imageUrls: combinedImages,
-          prompt: Prompt,
-        };
-        console.log(body)
-        const response = await axios.post(
-          "http://localhost:5000/api/gemini/edit-image",
-          body,
-          { headers: { "Content-Type": "application/json" } }
-        );
-
-        console.log("API response:", response.data);
-        if (response.data && response.data.url) {
-          setResultUrl(response.data.url);
-        } else {
-          alert("No image URL returned by API");
-        }
-      } catch (error) {
-        console.error("Error calling API:", error);
-        alert("Error calling API: " + error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-    const handleEnhance = async () => {
-      try {
-        setLoading(true);
-
-        const response = await axios.post(
-          "http://localhost:5000/api/gemini/optimize-prompt",
-          { prompt: Prompt },
-          { headers: { "Content-Type": "application/json" } }
-        );
-        if (response.data?.optimized_prompt) {
-          const enhancedPrompt = response.data.optimized_prompt;
-
-          const confirmReplace = window.confirm(
-            `Enhanced Prompt:\n\n${enhancedPrompt}\n\nDo you want to replace your current prompt with this optimized version?`
-          );
-
-          if (confirmReplace) {
-            setPrompt(enhancedPrompt);
-          }
-        } else {
-          alert("No enhanced prompt returned by API.");
-        }
-      } catch (error) {
-        console.error("❌ Error enhancing prompt:", error);
-        alert("Error enhancing prompt: " + (error.response?.data?.error || error.message));
-      } finally {
-        setLoading(false);
-      }
-    };
-
-
-
   return (
-    <div className="m-4 text-white flex flex-col items-start justify-start gap-4 px-4 w-full h-screen">
-      <h1 className="text-xl mb-2 text-white/40">Let's Start <a className="font-bold text-white/60">Fresh Today</a></h1>
+    <div className="flex flex-col items-center justify-start text-white w-full h-screen px-6 py-4 bg-[#0e0e0e] overflow-scroll scrollbar-hide relative">
+      {/* Title */}
+      <h1 className="text-lg text-gray-300 mb-2 w-full max-w-5xl">
+        Let’s Start <span className="font-semibold text-white">Fresh</span>
+      </h1>
 
-      <div className="flex gap-6 w-full max-w-5xl flex-col sm:flex-row">
-        <div className="flex flex-col items-center w-full sm:w-60 rounded-lg overflow-hidden relative">
+      {/* Top Section */}
+      <div className="flex flex-col sm:flex-row gap-6 w-full max-w-5xl">
+        {/* Avatar Section */}
+        <div className="flex flex-col items-center w-full sm:w-1/2">
           <div
-            className="relative w-60 h-60 bg-white/10 overflow-hidden flex items-center justify-center"
+            className="relative w-full aspect-square bg-white/10 rounded-lg flex items-center justify-center overflow-hidden"
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
           >
             {avatar ? (
               <>
-                <img
-                  src={avatar}
-                  alt="User Avatar"
-                  className="w-full h-full object-cover"
-                />
+                <img src={avatar} alt="Avatar" className="object-cover w-full h-full" />
                 {hovering && (
-                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-4 transition-all">
+                  <div className="absolute inset-0 bg-black/60 flex justify-center items-center gap-3">
                     <button
                       onClick={handleEdit}
-                      className="bg-primary hover:bg-primary p-2 rounded-full"
-                      title="Edit Avatar"
+                      className="bg-primary text-white p-2 rounded-full"
+                      title="Edit"
                     >
                       <Pencil size={18} />
                     </button>
                     <button
                       onClick={handleDelete}
-                      className="bg-primary-tint hover:bg-primary-tint/80 p-2 rounded-full"
-                      title="Delete Avatar"
+                      className="bg-primary-tint text-black p-2 rounded-full"
+                      title="Delete"
                     >
                       <Trash2 size={18} />
                     </button>
@@ -210,7 +142,11 @@ function Main() {
                 )}
               </>
             ) : (
-              <label className="text-gray-400 cursor-pointer text-sm text-center">
+              <label
+                htmlFor="avatarUpload"
+                className="text-gray-400 text-sm cursor-pointer hover:text-gray-200 transition"
+              >
+                Click to upload avatar
                 <input
                   id="avatarUpload"
                   type="file"
@@ -218,63 +154,93 @@ function Main() {
                   onChange={handleAvatarUpload}
                   className="hidden"
                 />
-                Click to upload Avatar
               </label>
             )}
           </div>
-
-          <div className="absolute bottom-0 bg-blue-900/0 w-full py-2 rounded-b-xl text-center text-sm mt-[-4px]">
-            Your Avatar
-          </div>
+          <p className="text-gray-400 text-sm mt-2">Your Avatar</p>
         </div>
 
-        <SelectedCloths />
+        {/* Cloths Section */}
+        <div className="flex flex-col items-center w-full sm:w-1/2">
+          <div className="w-full aspect-square bg-white/5 border border-dashed border-gray-600 rounded-lg flex items-center justify-center text-gray-400 text-sm">
+            {cloths.length > 0 ? <SelectedCloths /> : "Select Cloths From Side Menu"}
+          </div>
+          <p className="text-gray-400 text-sm mt-2">Cloths</p>
+        </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-5xl mt-4">
-        <input
-        value={Prompt}
-        onChange={(e) => setPrompt(e.target.value)}
-          type="text"
-          placeholder="Describe your expectations.."
-          className="flex-1 bg-transparent border border-gray-700 rounded-md px-4 flex-wrap placeholder-gray-500 focus:outline-none"
-        />
-        <div className="flex gap-2 flex-col">
+      {/* Bottom Input Bar (now scoped inside main width) */}
+      <div className="fixed bottom-4 w-full flex justify-center">
+        <div className="flex w-full max-w-5xl bg-white/20 p-3 gap-3 shadow-md backdrop-blur-3xl rounded-lg">
+          <input
+            type="text"
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            placeholder="Describe the style..."
+            className="flex-1 text-gray-200 rounded-lg px-4 py-2 placeholder-gray-500 focus:outline-none"
+          />
           <button
             onClick={handleEnhance}
-            className="bg-primary text-white text-lg tracking-tight px-6 py-2 rounded-md w-full sm:w-auto"
             disabled={loading}
+            className="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-5 py-2 rounded-lg transition"
           >
-            {loading ? "Enhanceing..." : "Enhance Prompt"}
+            <img src="../src/assets/logo/Star2.png" className="scale-110 hover:animate-spin transition-all" alt="" />
           </button>
           <button
             onClick={handleGenerate}
-            className="bg-primary-tint text-black font-bold text-xl tracking-tight px-6 py-2 rounded-md w-full sm:w-auto"
             disabled={loading}
+            className="bg-primary-tint text-black font-bold px-6 py-2 rounded-lg transition"
           >
             {loading ? "Generating..." : "Generate"}
           </button>
         </div>
       </div>
 
+      {/* Generated Output */}
       {resultUrl && (
-        <div className="w-full max-w-5xl mt-6">
-          <h2 className="text-lg mb-2">Generated Output:</h2>
-          <img
-            src={resultUrl}
-            alt="Generated Result"
-            className="w-full max-h-[500px] object-contain rounded-lg border border-gray-700"
+  <div className="w-full max-w-5xl mt-6 mb-28 relative">
+    <div className="flex justify-between items-center mb-2">
+      <h2 className="text-gray-300 text-sm">Generated Output:</h2>
+      <button
+        onClick={() => setResultUrl("")}
+        className="flex items-center gap-1 text-red-400 hover:text-red-300 text-sm transition"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+          className="w-4 h-4"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 18L18 6M6 6l12 12"
           />
-        </div>
-      )}
+        </svg>
+        Delete
+      </button>
+    </div>
 
-      <input
-        id="avatarUpload"
-        type="file"
-        accept="image/*"
-        onChange={handleAvatarUpload}
-        className="hidden"
+    <div className="relative group">
+      <img
+        src={resultUrl}
+        alt="Generated Result"
+        className="w-full max-h-[400px] object-contain rounded-lg border border-gray-700"
       />
+
+      {/* Hover delete overlay (optional) */}
+      <button
+        onClick={() => setResultUrl("")}
+        className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white text-xs px-3 py-1 rounded-md opacity-0 group-hover:opacity-100 transition"
+      >
+        Delete
+      </button>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }
