@@ -38,14 +38,14 @@ export async function generate(imagePaths = [], prompt, requestId) {
           });
         }
         if (mimeType === "image/heic" || mimeType === "image/heif") {
-          console.log("🔄 Converting HEIC/HEIF to JPEG before sending to Gemini...");
+          console.log(" Converting HEIC/HEIF to JPEG before sending to Gemini...");
           const convertedBuffer = await sharp(buffer).jpeg().toBuffer();
           buffer = convertedBuffer;
           mimeType = "image/jpeg";
         }
 
         if (!mimeType.startsWith("image/")) {
-          console.warn(`⚠️ Forcing MIME type fallback for: ${path}`);
+          console.warn(` Forcing MIME type fallback for: ${path}`);
           mimeType = "image/jpeg";
         }
         return {
@@ -56,9 +56,25 @@ export async function generate(imagePaths = [], prompt, requestId) {
         };
       })
     );
+    const fullPrompt = `
+    USER REQUEST:
+    ${prompt}
+
+    SYSTEM INSTRUCTION:
+    You are modifying a photo of a real person. Preserve the person’s original face, identity, skin tone, hair, pose, body shape, posture, hands, background, and lighting EXACTLY as they appear in the input image.
+
+    Only modify the clothing if the user explicitly asks for a clothing change. If not, keep the existing clothes unchanged.
+
+    When changing clothes:
+    - Maintain realism
+    - Keep body, pose, environment unchanged
+    - Follow correct fabric physics
+    - Keep skin tones and face identical
+
+    `;
 
     const contents = [
-      { role: "user", parts: [...imageParts, { text: prompt }] },
+      { role: "user", parts: [...imageParts, { text: fullPrompt }] },
     ];
     const response = await ai.models.generateContent({
       model,
@@ -70,7 +86,7 @@ export async function generate(imagePaths = [], prompt, requestId) {
     });
     
     const candidate = response.candidates?.[0];
-    console.log(candidate.content)
+    console.log(response)
     const part = candidate?.content?.parts?.[0];
     if (!part?.inlineData) throw new Error("No image returned from Gemini");
 

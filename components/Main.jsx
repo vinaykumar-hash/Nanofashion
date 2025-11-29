@@ -165,7 +165,7 @@ useEffect(() => {
         setIsDragging(true);
       }}
       style={{ position: "absolute", cursor: "grab" }}
-      className="noselect absolute bottom-0 flex flex-col sm:flex-row gap-6 w-full max-w-5xl">
+      className="noselect absolute top-20  flex flex-col sm:flex-row gap-6 w-full max-w-5xl">
         <div className="flex flex-col items-center w-full sm:w-1/2">
           <div
             className="relative w-full aspect-square bg-white/10 rounded-lg flex items-center justify-center overflow-hidden"

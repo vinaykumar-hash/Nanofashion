@@ -10,14 +10,17 @@ dotenv.config();
 
 export const generateCloth = async (req, res) => {
   try {
+    
     const { prompt } = req.body;
     if (!prompt) return res.status(400).json({ error: "Prompt is required" });
 
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) throw new Error("GEMINI_API_KEY missing from .env");
-
+    
     const ai = new GoogleGenAI({ apiKey });
-
+    
+    
+    console.log("passed")
     const response = await ai.models.generateContent({
       model,
       contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -40,7 +43,7 @@ export const generateCloth = async (req, res) => {
 
     res.json({ success: true, url: publicUrl, prompt });
   } catch (error) {
-    console.error("❌ Error generating cloth image:", error.message);
+    console.error(" Error generating cloth image:", error.message);
     res.status(500).json({ error: error.message });
   }
 };

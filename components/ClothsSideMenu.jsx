@@ -26,21 +26,40 @@ function ClothsSideMenu() {
   }, []);
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return alert("Enter a prompt!");
-    try {
-      setLoading(true);
-      const response = await axios.post(import.meta.env.VITE_BACKEND_URL+"/api/gemini/generate-cloth", { prompt });
-      if (response.data.success) {
-        setLoading(false);
-        setCloths((prev) => [response.data, ...prev]);
-        setPrompt("");
-        await fetchCloths();
-      }
-    } catch (error) {
-      console.error("Error generating cloth:", error);
-      alert("Error generating cloth");
+  const systemPrompt = `
+Create only the clothing item based on the user's description.
+Exclude humans entirely — no faces, no skin, no body parts, no mannequins, no limbs.
+The clothing should be displayed alone, front-facing, centered, with realistic fabric texture.
+Use a clean, minimal, studio-style background with soft lighting.
+Show the complete garment clearly without any person wearing it.
+Avoid generating accessories, props, or unrelated objects.
+Output must contain ONLY the clothing item.
+`;
+
+  if (!prompt.trim()) return alert("Enter a prompt!");
+
+  const fullPrompt = prompt + "\n\n" + systemPrompt;
+
+  try {
+    setLoading(true);
+
+    const response = await axios.post(
+      import.meta.env.VITE_BACKEND_URL + "/api/gemini/generate-cloth",
+      { prompt: fullPrompt }
+    );
+
+    if (response.data.success) {
+      setCloths((prev) => [response.data, ...prev]);
+      setPrompt("");
     }
-  };
+  } catch (error) {
+    console.error("Error generating cloth:", error);
+    alert("Error generating cloth");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className=" flex flex-col h-full relative">
