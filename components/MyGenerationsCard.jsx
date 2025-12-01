@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 
 function MyGenerationsCard({ url , prompt, ele }) {
-  console.log(ele);
   const [showImg,setShowImg] = useState(false);
   
   return (

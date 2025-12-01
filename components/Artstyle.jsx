@@ -11,7 +11,7 @@ function Artstyle() {
   useEffect(() => {
     const fetchStyles = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/gemini/artstyles");
+        const res = await axios.get(import.meta.env.VITE_BACKEND_URL+`/api/gemini/artstyles`);
         setStyles(res.data.styles || []);
       } catch (err) {
         console.error("Error fetching artstyles:", err);
@@ -27,7 +27,7 @@ function Artstyle() {
       localStorage.setItem("selectedArtstyle", name);
 
       const res = await axios.get(
-        `http://localhost:5000/api/gemini/artstyles/${encodeURIComponent(name)}`
+        import.meta.env.VITE_BACKEND_URL+`/api/gemini/artstyles/${encodeURIComponent(name)}`
       );
 
       const prompt = res.data.prompt;
