@@ -5,7 +5,11 @@ import axios from "axios";
 import heic2any from "heic2any";
 
 function Main() {
-  const resultRefs = React.useRef([]);
+  const resultRefs = React.useRef([]);const [selectedBaseImage, setSelectedBaseImage] = useState(
+  localStorage.getItem("selectedBaseImage") || null
+);
+
+  const [sizes, setSizes] = useState({}); 
 
   const dragRef = React.useRef(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -110,8 +114,11 @@ useEffect(() => {
 
     const body = {
       id: localStorage.getItem("ProfileID"),
-      imageUrls: [localStorage.getItem("userAvatar"), ...cloths],
-      prompt,
+      imageUrls: [
+          selectedBaseImage || localStorage.getItem("userAvatar"),
+          ...cloths,
+        ],
+      prompt: prompt + " " + localStorage.getItem("selectedArtstylePrompt"),
     };
 
     const response = await axios.post(
@@ -120,7 +127,15 @@ useEffect(() => {
     );
 
     if (response.data?.url) {
-      setResults(prev => [...prev, response.data.url]);  // append
+      setResults(prev => {
+        const newIndex = prev.length;
+        setSizes((s) => ({
+          ...s,
+          [newIndex]: { width: 300, height: 300 }
+        }));
+        return [...prev, response.data.url];
+      });
+  // append
     } else {
       alert("No image URL returned by API");
     }
@@ -246,6 +261,36 @@ useEffect(() => {
       {/* Generated Output */}
       {results.length > 0 &&
   results.map((url, index) => {
+    const handleResizeMouseDown = (e) => {
+        e.stopPropagation(); // Don’t trigger drag
+        const startX = e.clientX;
+        const startY = e.clientY;
+
+        const initialWidth = sizes[index]?.width || 300;
+        const initialHeight = sizes[index]?.height || 300;
+
+        const onMouseMove = (moveEvent) => {
+          const newWidth = initialWidth + (moveEvent.clientX - startX);
+          const newHeight = initialHeight + (moveEvent.clientY - startY);
+
+          setSizes((prev) => ({
+            ...prev,
+            [index]: {
+              width: Math.max(150, newWidth),   // minimum size
+              height: Math.max(150, newHeight),
+            }
+          }));
+        };
+
+        const onMouseUp = () => {
+          window.removeEventListener("mousemove", onMouseMove);
+          window.removeEventListener("mouseup", onMouseUp);
+        };
+
+        window.addEventListener("mousemove", onMouseMove);
+        window.addEventListener("mouseup", onMouseUp);
+      };
+
     const ref = (el) => (resultRefs.current[index] = el);
 
     const handleMouseDown = (e) => {
@@ -290,11 +335,14 @@ useEffect(() => {
           left: "60vw",
           top: `${20 + index * 15}px`,
           zIndex: 0+index,
+          width: sizes[index]?.width || 300,
+          height: sizes[index]?.height || 300,
         }}
-        className="w-[300px] aspect-square relative noselect"
+        // className="w-[300px] aspect-square relative noselect rounded-lg"
+        className="relative noselect rounded-lg  "
       >
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-gray-300 text-sm font-fustat opacity-50 bg-white/10 rounded-lg py-1 px-4 ">Generated Output {index +1}</h2>
+          <h2 className="text-gray-300 text-sm font-fustat opacity-50 backdrop-blur-2xl bg-white/10 rounded-lg py-1 px-4 ">Generated Output {index +1}</h2>
           {/* <button
             onClick={() =>
               setResults((prev) => prev.filter((_, i) => i !== index))
@@ -306,22 +354,59 @@ useEffect(() => {
         </div>
 
         <div className="relative w-full h-full aspect-square rounded-lg overflow-hidden group">
-          <img
+          {/* <img
             src={url}
             alt="Generated Result"
             className="w-full h-full object-cover border border-gray-700"
-          />
+          /> */}
+          <div
+              onClick={() => {
+                setSelectedBaseImage(url);
+                localStorage.setItem("selectedBaseImage", url);
+              }}
+              className="relative w-full h-full cursor-pointer"
+            >
+              <img
+                src={url}
+                alt="Generated Result"
+                className="w-full h-full object-cover border border-gray-700"
+              />
 
+              {selectedBaseImage === url && (
+                <div className="absolute top-2 left-2 bg-primary-dark/80 backdrop-blur-lg px-3 py-1 rounded-md text-xs font-fustat text-white">
+                  Base Image
+                </div>
+              )}
+            </div>
+            
           <button
             onClick={() =>
               setResults((prev) => prev.filter((_, i) => i !== index))
             }
-            className="font-fustat absolute top-3 right-3 bg-black/50 backdrop-blur-2xl hover:bg-black/70 
+            className=" font-fustat absolute top-3 right-3 bg-black/50 backdrop-blur-2xl hover:bg-black/70 
               text-white text-xs px-3 py-1 rounded-md opacity-0 
               group-hover:opacity-100 transition"
           >
             Delete
           </button>
+          {selectedBaseImage === url && (
+              <button
+                onClick={() => {
+                  setSelectedBaseImage(null);
+                  localStorage.removeItem("selectedBaseImage");
+                }}
+                className="font-fustat absolute bottom-2 left-2 mt-2 text-xs bg-black/80 backdrop-blur-2xl px-3 py-1 rounded-lg"
+              >
+                Remove Base Image
+              </button>
+              
+            )}
+            <div
+              onMouseDown={handleResizeMouseDown}
+              className="absolute bottom-1 right-1 w-4  flex justify-end items-end cursor-se-resize"
+            >
+              <div className="w-4 h-4 bg-primary-dark rounded-lg"></div>
+            </div>
         </div>
       </div>
     );
