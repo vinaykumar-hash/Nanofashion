@@ -5,7 +5,7 @@ import Artstyle from './Artstyle'
 import { useState } from 'react'
 function QuickBar() {
     const [Clothes,setClothes] = useState(false);
-    const [showArtSyle,setshowArtstyle] = useState(true)
+    const [showArtSyle,setshowArtstyle] = useState(false)
   return (
     <div className=' z-50 h-screen absolute flex flex-row justify-center items-center pl-4 top-0 left-0'>
         <div className='shadow-xl shadow-black/20 border border-white/10 bg-black/20 backdrop-blur-sm rounded-lg px-4 py-4'>
