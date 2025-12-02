@@ -170,8 +170,10 @@ useEffect(() => {
   };
 
   return (
+    
     <div className=" flex flex-col items-center justify-start text-white w-full h-screen px-6 py-4 bg-primary-dark overflow-scroll scrollbar-hide relative bg-[linear-gradient(to_right,#3332_1px,transparent_1px),linear-gradient(to_bottom,#3332_1px,transparent_1px)] bg-[size:40px_40px]">
       {/* Title */}
+      
       {/* form here */}
       <div ref={dragRef}
       onMouseDown={(e) => {
@@ -253,11 +255,11 @@ useEffect(() => {
             disabled={loading}
             className="bg-primary-tint text-white/80 font-fustat tracking-tight font-bold px-6 py-2 rounded-lg transition"
           >
-            {loading ? "Generating..." : "Generate"}
+            {loading ? "Generating" : "Generate"}
           </button>
         </div>
       </div>
-
+      
       {/* Generated Output */}
       {results.length > 0 &&
   results.map((url, index) => {

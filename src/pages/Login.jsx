@@ -19,7 +19,7 @@ export default function Login() {
         }
   
         if (user) {
-          navigate('/');
+          navigate('/dashboard');
         } else {
           
         }
@@ -58,7 +58,7 @@ export default function Login() {
         const profile = profiles && profiles[0]; 
 
         if (profile && profile.avatar_url) {
-          navigate("/");
+          navigate("/dashboard");
         } else {
           navigate("/setup");
         }
@@ -69,7 +69,8 @@ export default function Login() {
   };
 
   return (
-    <div className="overflow-hidden flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8 bg-primary-dark font-kollektif">
+    <div className="relative bg-black overflow-hidden flex min-h-screen flex-col justify-center px-6 py-12 lg:px-8 font-fustat">
+      <div className="absolute z-0"></div>
       {/* <div style={{ position: 'absolute', overflow: 'hidden' }} className="z-0 w-full h-full">
   <FaultyTerminal
     scale={1.5}
@@ -91,24 +92,10 @@ export default function Login() {
     brightness={0.1}
   />
 </div> */}
-<div  className="z-0 absolute">
-        <ColorBends
-          colors={["#ff5c7a", "#8a5cff", "#00ffd1"]}
-          rotation={30}
-          speed={0.3}
-          scale={1.2}
-          frequency={1.4}
-          warpStrength={1.2}
-          mouseInfluence={0.8}
-          parallax={0.6}
-          noise={0.08}
-          transparent
-        />
-      </div>
-      
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm z-10">
-        <h2 className="mt-10 text-center text-2xl font-bold tracking-tight text-white">
-          Sign in to your account
+      <div className="relative z-10 flex flex-col justify-center mx-80 py-20 rounded-lg bg-primary-dark">
+        <div className="sm:mx-auto sm:w-full sm:max-w-sm z-10 rounded-lg">
+        <h2 className=" mt-10 text-center text-4xl font-bold tracking-tight text-white">
+          Sign in
         </h2>
       </div>
 
@@ -117,20 +104,20 @@ export default function Login() {
           <div>
             <label
               htmlFor="email"
-              className="block text-sm font-medium text-gray-100"
+              className="font-fustat block text-sm font-medium text-gray-100"
             >
-              Email address
+              Email 
             </label>
-            <div className="mt-2">
+            <div className="mt-1">
               <input
                 id="email"
                 name="email"
                 type="email"
                 required
-                placeholder="you@example.com"
+                placeholder="your@email.com"
                 value={formData.email}
                 onChange={handleChange}
-                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white placeholder:text-gray-500 focus:outline-2 focus:outline-primary sm:text-sm"
+                className="font-fustat block w-full rounded-md bg-white/5 p-4 text-base text-white placeholder:text-gray-500 outline-none sm:text-sm"
               />
             </div>
           </div>
@@ -138,11 +125,11 @@ export default function Login() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-100"
+              className="font-fustat block text-sm font-medium text-gray-100"
             >
               Password
             </label>
-            <div className="mt-2">
+            <div className="mt-1">
               <input
                 id="password"
                 name="password"
@@ -151,23 +138,26 @@ export default function Login() {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className="block w-full rounded-md bg-white/5 px-3 py-1.5 text-base text-white placeholder:text-gray-500 focus:outline-2 focus:outline-primary sm:text-sm"
+                className="font-fustat block w-full rounded-md bg-white/5 p-4 text-base text-white placeholder:text-gray-500 focus:outline-2 focus:outline-primary sm:text-sm"
               />
             </div>
           </div>
 
-          <div>
+          <div className="relative">
+            <div className='absolute h-1/2 w-3/4 bg-primary-tint rounded-t-full'></div>
+        
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full justify-center rounded-md bg-primary-tint px-3 py-1.5 text-sm font-semibold text-primary-dark hover:bg-primary-tint/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-tint"
+              style={{backdropFilter:"blur(200px)"}}
+              className="flex w-full justify-center bg-white/5 text-sm font-semibold text-white font-fustat hover:bg-primary-tint/80 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-tint px-6 py-2 rounded-full border border-white/10"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
           </div>
         </form>
 
-        <p className="mt-10 text-center text-sm text-gray-400">
+        <p className="font-fustat mt-10 text-center text-sm text-gray-400">
           New here?{" "}
           <a
             href="/signup"
@@ -177,6 +167,8 @@ export default function Login() {
           </a>
         </p>
       </div>
+      </div>
+      
     </div>
   );
 }

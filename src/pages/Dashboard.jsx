@@ -46,11 +46,11 @@ export default function Dashboard() {
 
   return (
     <div className=" text-white font-kollektif bg-[#111] min-h-screen flex items-center justify-start flex-col">
-      {user ? <Header userID={user.id} /> : <p>Loading...</p>}
+      {user ? <Header userID={user.id} /> : null}
       <div className="relative flex items-start justify-start w-full flex-1 h-screen">
         {/* <SideMenu/> */}
         <QuickBar/>
-       {user ? <Main userID={user.id} /> : <p>Loading...</p>}
+       {user ? <Main userID={user.id} /> : null}
       </div>
       <MyGenerations show = {showGenerated}/>
       {/* <Radio/> */}
